@@ -13,8 +13,15 @@ interface SignInCredentials {
   password: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url: string;
+}
+
 interface AuthContextData {
-  user: object;
+  user: User;
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
   loading: boolean;
@@ -22,7 +29,7 @@ interface AuthContextData {
 
 interface AuthData {
   token: string;
-  user: object;
+  user: User;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -38,6 +45,8 @@ export const AuthProvider: React.FC = ({ children }) => {
 
       if (token && user) {
         setData({ token, user: await JSON.parse(user) });
+
+        api.defaults.headers.authorization = `Bearer ${token}`;
       }
 
       setLoading(false);
@@ -55,6 +64,8 @@ export const AuthProvider: React.FC = ({ children }) => {
       ['@GoBarber:token', token],
       ['@GoBarber:user', JSON.stringify(user)],
     ]);
+
+    api.defaults.headers.authorization = `Bearer ${token}`;
 
     setData({ token, user });
   }, []);
