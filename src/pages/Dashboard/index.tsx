@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
@@ -29,7 +29,7 @@ export interface Provider {
 
 const Dashboard: React.FC = () => {
   const [providers, setProviders] = useState<Provider[]>([]);
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
 
   const { navigate } = useNavigation();
 
@@ -38,10 +38,8 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const navigationToProfile = useCallback(() => {
-    // navigate('Profile');
-
-    signOut();
-  }, [signOut]);
+    navigate('Profile');
+  }, [navigate]);
 
   const navigationToCreateAppointment = useCallback(
     (providerId: string) => {
@@ -49,6 +47,13 @@ const Dashboard: React.FC = () => {
     },
     [navigate]
   );
+
+  const loadUserImage = useMemo(() => {
+    if (user.avatar_url) {
+      return user.avatar_url;
+    }
+    return `https://api.adorable.io/avatars/285/${user.name}`;
+  }, [user]);
 
   return (
     <>
@@ -64,7 +69,7 @@ const Dashboard: React.FC = () => {
           <ProfileButton onPress={navigationToProfile}>
             <UserAvatar
               source={{
-                uri: `https://api.adorable.io/avatars/285/${user.name}`,
+                uri: loadUserImage,
               }}
             />
           </ProfileButton>
@@ -82,7 +87,7 @@ const Dashboard: React.FC = () => {
             >
               <ProviderAvatar
                 source={{
-                  uri: `https://api.adorable.io/avatars/285/${provider.name}`,
+                  uri: provider.avatar_url,
                 }}
               />
 
